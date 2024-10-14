@@ -29,10 +29,8 @@ tx.add(
   })
 );
 
-// Sign the transaction with your previously created keypair
 tx.sign(keyPair);
 
-// Send the transaction to the Solana network
 const txHash = await connection.sendRawTransaction(tx.serialize());
 
 console.log("Transaction sent with hash:", txHash);
