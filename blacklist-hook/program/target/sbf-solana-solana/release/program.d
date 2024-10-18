@@ -1,0 +1,1 @@
+/Users/jereldlim/Desktop/solana-native-playground/blacklist-hook/program/target/sbf-solana-solana/release/program.so: /Users/jereldlim/Desktop/solana-native-playground/blacklist-hook/program/src/lib.rs

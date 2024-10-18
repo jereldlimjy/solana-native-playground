@@ -1,0 +1,10 @@
+/Users/jereldlim/Desktop/solana-native-playground/blacklist-hook/program/target/sbf-solana-solana/release/deps/libthiserror-01f607c190360edc.rmeta: /Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/lib.rs /Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/aserror.rs /Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/display.rs /Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/provide.rs
+
+/Users/jereldlim/Desktop/solana-native-playground/blacklist-hook/program/target/sbf-solana-solana/release/deps/libthiserror-01f607c190360edc.rlib: /Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/lib.rs /Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/aserror.rs /Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/display.rs /Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/provide.rs
+
+/Users/jereldlim/Desktop/solana-native-playground/blacklist-hook/program/target/sbf-solana-solana/release/deps/thiserror-01f607c190360edc.d: /Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/lib.rs /Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/aserror.rs /Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/display.rs /Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/provide.rs
+
+/Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/lib.rs:
+/Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/aserror.rs:
+/Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/display.rs:
+/Users/jereldlim/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-1.0.64/src/provide.rs:
