@@ -13,6 +13,7 @@ import {
   createInitializeMintInstruction,
   createInitializeTransferHookInstruction,
   createMintToInstruction,
+  createTransferCheckedWithTransferHookInstruction,
   ExtensionType,
   getAssociatedTokenAddressSync,
   getMintLen,
@@ -79,7 +80,7 @@ const main = async () => {
 
   const receiver = new Keypair();
   const receiverTokenAccount = getAssociatedTokenAddressSync(
-    mint,
+    mint.publicKey,
     receiver.publicKey,
     false,
     TOKEN_2022_PROGRAM_ID,
@@ -106,6 +107,7 @@ const main = async () => {
     createMintToInstruction(
       mint.publicKey,
       senderTokenAccount,
+      keyPair.publicKey,
       100 * 10 ** decimals, // 100 tokens
       [],
       TOKEN_2022_PROGRAM_ID
@@ -119,10 +121,33 @@ const main = async () => {
   );
 
   // transfer tokens from default keypair -> newly generated keypair
-  // transfer hook should be invoked
+  // create extraAccountMetaList account
+  // transfer instruction with transfer hook
+
+  // TODO: create extraAccountMetaList account
   const [extraAccountMetaListPDA] = PublicKey.findProgramAddressSync(
     [Buffer.from("extra-account-metas"), mint.publicKey.toBuffer()],
     transferHookProgramId
+  );
+
+  const txn3 = new Transaction().add(
+    await createTransferCheckedWithTransferHookInstruction(
+      connection,
+      senderTokenAccount,
+      mint.publicKey,
+      receiverTokenAccount,
+      keyPair.publicKey,
+      100 * 10 ** decimals,
+      [],
+      "confirmed",
+      TOKEN_2022_PROGRAM_ID
+    )
+  );
+
+  const txn3Hash = await sendAndConfirmTransaction(connection, txn3, [keyPair]);
+  console.log(
+    `Congratulations! Look at your transaction in the Solana Explorer:
+    https://explorer.solana.com/tx/${txn3Hash}?cluster=custom`
   );
 };
 
