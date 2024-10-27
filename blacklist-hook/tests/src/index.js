@@ -21,6 +21,7 @@ import {
 } from "@solana/spl-token";
 
 const main = async () => {
+  // TODO: update programId
   const transferHookProgramId = new PublicKey("");
   const connection = new Connection("http://127.0.0.1:8899", "confirmed");
   const keyPair = await getKeypairFromFile("~/.config/solana/id.json");
