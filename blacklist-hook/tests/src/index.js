@@ -5,6 +5,7 @@ import {
   sendAndConfirmTransaction,
   SystemProgram,
   Transaction,
+  TransactionInstruction,
 } from "@solana/web3.js";
 import { getKeypairFromFile } from "@solana-developers/helpers";
 import {
@@ -19,12 +20,137 @@ import {
   getMintLen,
   TOKEN_2022_PROGRAM_ID,
 } from "@solana/spl-token";
+import * as borsh from "@coral-xyz/borsh";
 
 const main = async () => {
   // TODO: update programId
-  const transferHookProgramId = new PublicKey("");
+  const programId = new PublicKey(
+    "FfnRtAECHeTpCqefKTcZ4UMHrtPkaXpMFfqrUv7U9U8t"
+  );
   const connection = new Connection("http://127.0.0.1:8899", "confirmed");
   const keyPair = await getKeypairFromFile("~/.config/solana/id.json");
+
+  // Admin PDA tests
+  // const blockhashInfo = await connection.getLatestBlockhash();
+
+  // // initialize admin instruction
+  // const initializeTxn = new Transaction({
+  //   ...blockhashInfo,
+  // });
+
+  // const initializeAdminSchema = borsh.struct([
+  //   borsh.u8("variant"),
+  //   borsh.publicKey("admin"),
+  // ]);
+
+  // const buffer = Buffer.alloc(1000);
+
+  // initializeAdminSchema.encode(
+  //   {
+  //     variant: 0,
+  //     admin: keyPair.publicKey,
+  //   },
+  //   buffer
+  // );
+
+  // const instructionBuffer = buffer.subarray(
+  //   0,
+  //   initializeAdminSchema.getSpan(buffer)
+  // );
+
+  // // seeds - sender address + movie title
+  // const seeds = [Buffer.from("admin")];
+
+  // const [pda, _] = PublicKey.findProgramAddressSync(seeds, programId);
+
+  // console.log("PDA is:", pda.toBase58());
+
+  // initializeTxn.add(
+  //   new TransactionInstruction({
+  //     programId,
+  //     keys: [
+  //       {
+  //         pubkey: keyPair.publicKey,
+  //         isSigner: true,
+  //         isWritable: true,
+  //       },
+  //       {
+  //         pubkey: pda,
+  //         isSigner: false,
+  //         isWritable: true,
+  //       },
+  //       {
+  //         pubkey: SystemProgram.programId,
+  //         isSigner: false,
+  //         isWritable: false,
+  //       },
+  //     ],
+  //     data: instructionBuffer,
+  //   })
+  // );
+
+  // const initializeTxHash = await sendAndConfirmTransaction(
+  //   connection,
+  //   initializeTxn,
+  //   [keyPair]
+  // );
+  // console.log(
+  //   `Congratulations! Look at your transaction in the Solana Explorer:
+  //   https://explorer.solana.com/tx/${initializeTxHash}?cluster=custom`
+  // );
+
+  // // update admin instruction
+  // const updateTxn = new Transaction({
+  //   ...(await connection.getLatestBlockhash()),
+  // });
+
+  // const updateAdminSchema = borsh.struct([
+  //   borsh.u8("variant"),
+  //   borsh.publicKey("new_admin"),
+  // ]);
+
+  // const buffer2 = Buffer.alloc(1000);
+  // const newKeyPair = new Keypair();
+
+  // updateAdminSchema.encode(
+  //   {
+  //     variant: 1,
+  //     new_admin: newKeyPair.publicKey,
+  //   },
+  //   buffer2
+  // );
+
+  // const instructionBuffer2 = buffer2.subarray(
+  //   0,
+  //   updateAdminSchema.getSpan(buffer2)
+  // );
+
+  // updateTxn.add(
+  //   new TransactionInstruction({
+  //     programId,
+  //     keys: [
+  //       {
+  //         pubkey: keyPair.publicKey,
+  //         isSigner: true,
+  //         isWritable: true,
+  //       },
+  //       {
+  //         pubkey: pda,
+  //         isSigner: false,
+  //         isWritable: true,
+  //       },
+  //     ],
+  //     data: instructionBuffer2,
+  //   })
+  // );
+
+  // const updateTxHash = await sendAndConfirmTransaction(connection, updateTxn, [
+  //   keyPair,
+  // ]);
+  // console.log(
+  //   `Congratulations! Look at your transaction in the Solana Explorer:
+  //   https://explorer.solana.com/tx/${updateTxHash}?cluster=custom`
+  // );
 
   // to create a mint with the transfer hook extension, we need to:
   // - create the mint account using the `createAccount` instruction on the SystemProgram

@@ -110,6 +110,7 @@ pub fn update_admin(
     accounts: &[AccountInfo],
     new_admin: Pubkey,
 ) -> ProgramResult {
+    msg!("Updating admin account...");
     let accounts_iter = &mut accounts.iter();
 
     let admin_account = next_account_info(accounts_iter)?;
