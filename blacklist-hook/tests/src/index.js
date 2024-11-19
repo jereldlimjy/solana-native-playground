@@ -20,12 +20,12 @@ import {
   getMintLen,
   TOKEN_2022_PROGRAM_ID,
 } from "@solana/spl-token";
+import {} from "@solana/spl-token-metadata";
 import * as borsh from "@coral-xyz/borsh";
 
 const main = async () => {
-  // TODO: update programId
-  const programId = new PublicKey(
-    "FfnRtAECHeTpCqefKTcZ4UMHrtPkaXpMFfqrUv7U9U8t"
+  const transferHookProgramId = new PublicKey(
+    "5GdeT4xoWizxecyPzWBkFbvuRohy2HUWcfhxRgXHvGSs"
   );
   const connection = new Connection("http://127.0.0.1:8899", "confirmed");
   const keyPair = await getKeypairFromFile("~/.config/solana/id.json");
@@ -61,13 +61,16 @@ const main = async () => {
   // // seeds - sender address + movie title
   // const seeds = [Buffer.from("admin")];
 
-  // const [pda, _] = PublicKey.findProgramAddressSync(seeds, programId);
+  // const [pda, _] = PublicKey.findProgramAddressSync(
+  //   seeds,
+  //   transferHookProgramId
+  // );
 
   // console.log("PDA is:", pda.toBase58());
 
   // initializeTxn.add(
   //   new TransactionInstruction({
-  //     programId,
+  //     programId: transferHookProgramId,
   //     keys: [
   //       {
   //         pubkey: keyPair.publicKey,
@@ -99,7 +102,7 @@ const main = async () => {
   //   https://explorer.solana.com/tx/${initializeTxHash}?cluster=custom`
   // );
 
-  // // update admin instruction
+  // update admin instruction
   // const updateTxn = new Transaction({
   //   ...(await connection.getLatestBlockhash()),
   // });
@@ -127,7 +130,7 @@ const main = async () => {
 
   // updateTxn.add(
   //   new TransactionInstruction({
-  //     programId,
+  //     programId: transferHookProgramId,
   //     keys: [
   //       {
   //         pubkey: keyPair.publicKey,
@@ -171,13 +174,13 @@ const main = async () => {
       programId: TOKEN_2022_PROGRAM_ID,
     }),
     createInitializeTransferHookInstruction(
-      mint,
+      mint.publicKey,
       keyPair.publicKey,
       transferHookProgramId,
       TOKEN_2022_PROGRAM_ID
     ),
     createInitializeMintInstruction(
-      mint,
+      mint.publicKey,
       decimals,
       keyPair.publicKey,
       null,
@@ -264,7 +267,7 @@ const main = async () => {
       mint.publicKey,
       receiverTokenAccount,
       keyPair.publicKey,
-      100 * 10 ** decimals,
+      10 * 10 ** decimals,
       [],
       "confirmed",
       TOKEN_2022_PROGRAM_ID

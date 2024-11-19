@@ -38,6 +38,14 @@ pub fn process_instruction(
                 BlacklistInstruction::UpdateAdmin { new_admin } => {
                     update_admin(program_id, accounts, new_admin)
                 }
+                BlacklistInstruction::AddToBlacklist { address } => {
+                    msg!("add to blacklist");
+                    Ok(())
+                }
+                BlacklistInstruction::RemoveFromBlacklist { address } => {
+                    msg!("remove from blacklist");
+                    Ok(())
+                }
             };
         }
     }

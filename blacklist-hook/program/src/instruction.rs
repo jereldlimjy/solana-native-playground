@@ -14,6 +14,8 @@ pub struct UpdateAdminPayload {
 pub enum BlacklistInstruction {
     InitializeAdmin { admin: Pubkey },
     UpdateAdmin { new_admin: Pubkey },
+    AddToBlacklist { address: Pubkey },
+    RemoveFromBlacklist { address: Pubkey },
 }
 
 impl BlacklistInstruction {
