@@ -11,6 +11,16 @@ pub struct UpdateAdminPayload {
     pub new_admin: Pubkey,
 }
 
+#[derive(BorshSerialize, BorshDeserialize)]
+pub struct AddToBlacklistPayload {
+    pub address: Pubkey,
+}
+
+#[derive(BorshSerialize, BorshDeserialize)]
+pub struct RemoveFromBlacklistPayload {
+    pub address: Pubkey,
+}
+
 pub enum BlacklistInstruction {
     InitializeAdmin { admin: Pubkey },
     UpdateAdmin { new_admin: Pubkey },
@@ -39,6 +49,22 @@ impl BlacklistInstruction {
 
                 Ok(BlacklistInstruction::UpdateAdmin {
                     new_admin: payload.new_admin,
+                })
+            }
+            2 => {
+                let payload = AddToBlacklistPayload::try_from_slice(rest)
+                    .map_err(|_| ProgramError::InvalidInstructionData)?;
+
+                Ok(BlacklistInstruction::AddToBlacklist {
+                    address: payload.address,
+                })
+            }
+            3 => {
+                let payload = RemoveFromBlacklistPayload::try_from_slice(rest)
+                    .map_err(|_| ProgramError::InvalidInstructionData)?;
+
+                Ok(BlacklistInstruction::RemoveFromBlacklist {
+                    address: payload.address,
                 })
             }
             _ => Err(ProgramError::InvalidInstructionData),

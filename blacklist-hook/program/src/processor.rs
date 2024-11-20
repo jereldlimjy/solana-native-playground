@@ -119,10 +119,11 @@ pub fn update_admin(
     new_admin: Pubkey,
 ) -> ProgramResult {
     msg!("Updating admin account...");
-    let accounts_iter = &mut accounts.iter();
 
-    let admin_account = next_account_info(accounts_iter)?;
-    let pda_account = next_account_info(accounts_iter)?;
+    let account_info_iter = &mut accounts.iter();
+
+    let admin_account = next_account_info(account_info_iter)?;
+    let pda_account = next_account_info(account_info_iter)?;
 
     if !admin_account.is_signer {
         return Err(ProgramError::MissingRequiredSignature);
@@ -154,6 +155,90 @@ pub fn update_admin(
     account_data.admin = new_admin;
 
     account_data.serialize(&mut &mut pda_account.data.borrow_mut()[..])?;
+
+    Ok(())
+}
+
+pub fn add_to_blacklist(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    blacklist_address: Pubkey,
+) -> ProgramResult {
+    msg!("Blacklisting address {}...", blacklist_address);
+
+    let account_info_iter = &mut accounts.iter();
+
+    let initializer = next_account_info(account_info_iter)?;
+    let admin_pda_account = next_account_info(account_info_iter)?;
+    let blacklist_pda_account = next_account_info(account_info_iter)?;
+    let system_program = next_account_info(account_info_iter)?;
+
+    if !initializer.is_signer {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
+    // verify admin PDA and authority
+    let (expected_admin_pda, _) = Pubkey::find_program_address(&["admin".as_bytes()], program_id);
+
+    if *admin_pda_account.key != expected_admin_pda {
+        return Err(ProgramError::InvalidArgument);
+    }
+
+    let admin_account_data = AdminAccountState::try_from_slice(&admin_pda_account.data.borrow())
+        .map_err(|_| ProgramError::InvalidAccountData)?;
+
+    if !admin_account_data.is_initialized {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    if *initializer.key != admin_account_data.admin {
+        return Err(ProgramError::IncorrectAuthority);
+    }
+
+    // initialize blacklist account - no data needed
+    let (expected_blacklist_pda, bump_seed) = Pubkey::find_program_address(
+        &[
+            "blacklist".as_bytes(),
+            blacklist_address.to_bytes().as_ref(),
+        ],
+        program_id,
+    );
+
+    if *blacklist_pda_account.key != expected_blacklist_pda {
+        return Err(ProgramError::InvalidArgument);
+    }
+
+    invoke_signed(
+        &system_instruction::create_account(
+            initializer.key,
+            &expected_blacklist_pda,
+            Rent::get()?.minimum_balance(0),
+            0,
+            program_id,
+        ),
+        &[
+            initializer.clone(),
+            blacklist_pda_account.clone(),
+            system_program.clone(),
+        ],
+        &[&[
+            "blacklist".as_bytes().as_ref(),
+            blacklist_address.to_bytes().as_ref(),
+            &[bump_seed],
+        ]],
+    )?;
+
+    msg!("Blacklist PDA account created: {}", expected_blacklist_pda);
+
+    Ok(())
+}
+
+pub fn remove_from_blacklist(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    address: Pubkey,
+) -> ProgramResult {
+    msg!("Removing address {} from blacklist...", address);
 
     Ok(())
 }
