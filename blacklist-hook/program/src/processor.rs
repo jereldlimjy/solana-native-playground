@@ -8,7 +8,7 @@ use solana_program::{
     program_error::ProgramError,
     pubkey::Pubkey,
     rent::Rent,
-    system_instruction,
+    system_instruction, system_program,
     sysvar::Sysvar,
 };
 use spl_transfer_hook_interface::instruction::TransferHookInstruction;
@@ -39,12 +39,10 @@ pub fn process_instruction(
                     update_admin(program_id, accounts, new_admin)
                 }
                 BlacklistInstruction::AddToBlacklist { address } => {
-                    msg!("add to blacklist");
-                    Ok(())
+                    add_to_blacklist(program_id, accounts, address)
                 }
                 BlacklistInstruction::RemoveFromBlacklist { address } => {
-                    msg!("remove from blacklist");
-                    Ok(())
+                    remove_from_blacklist(program_id, accounts, address)
                 }
             };
         }
@@ -236,9 +234,64 @@ pub fn add_to_blacklist(
 pub fn remove_from_blacklist(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
-    address: Pubkey,
+    blacklist_address: Pubkey,
 ) -> ProgramResult {
-    msg!("Removing address {} from blacklist...", address);
+    msg!("Removing address {} from blacklist...", blacklist_address);
+
+    let account_info_iter = &mut accounts.iter();
+
+    let admin_account = next_account_info(account_info_iter)?;
+    let admin_pda_account = next_account_info(account_info_iter)?;
+    let blacklist_pda_account = next_account_info(account_info_iter)?;
+
+    if !admin_account.is_signer {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
+    // verify admin PDA and authority
+    let (expected_admin_pda, _) = Pubkey::find_program_address(&["admin".as_bytes()], program_id);
+
+    if *admin_pda_account.key != expected_admin_pda {
+        return Err(ProgramError::InvalidArgument);
+    }
+
+    let admin_account_data = AdminAccountState::try_from_slice(&admin_pda_account.data.borrow())
+        .map_err(|_| ProgramError::InvalidAccountData)?;
+
+    if !admin_account_data.is_initialized {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    if *admin_account.key != admin_account_data.admin {
+        return Err(ProgramError::IncorrectAuthority);
+    }
+
+    // close blacklist account
+    let (expected_blacklist_pda, _) = Pubkey::find_program_address(
+        &[
+            "blacklist".as_bytes(),
+            blacklist_address.to_bytes().as_ref(),
+        ],
+        program_id,
+    );
+
+    if *blacklist_pda_account.key != expected_blacklist_pda {
+        return Err(ProgramError::InvalidArgument);
+    }
+
+    let dest_starting_lamports = admin_account.lamports();
+
+    **admin_account.lamports.borrow_mut() = dest_starting_lamports
+        .checked_add(blacklist_pda_account.lamports())
+        .ok_or(ProgramError::ArithmeticOverflow)?;
+    **blacklist_pda_account.lamports.borrow_mut() = 0;
+
+    let mut data = blacklist_pda_account.try_borrow_mut_data()?;
+    for byte in data.iter_mut() {
+        *byte = 0;
+    }
+
+    msg!("Blacklist PDA account {} closed", expected_blacklist_pda);
 
     Ok(())
 }

@@ -255,30 +255,30 @@ const main = async () => {
   // transfer instruction with transfer hook
 
   // TODO: create extraAccountMetaList account
-  const [extraAccountMetaListPDA] = PublicKey.findProgramAddressSync(
-    [Buffer.from("extra-account-metas"), mint.publicKey.toBuffer()],
-    transferHookProgramId
-  );
+  // const [extraAccountMetaListPDA] = PublicKey.findProgramAddressSync(
+  //   [Buffer.from("extra-account-metas"), mint.publicKey.toBuffer()],
+  //   transferHookProgramId
+  // );
 
-  const txn3 = new Transaction().add(
-    await createTransferCheckedWithTransferHookInstruction(
-      connection,
-      senderTokenAccount,
-      mint.publicKey,
-      receiverTokenAccount,
-      keyPair.publicKey,
-      10 * 10 ** decimals,
-      [],
-      "confirmed",
-      TOKEN_2022_PROGRAM_ID
-    )
-  );
+  // const txn3 = new Transaction().add(
+  //   await createTransferCheckedWithTransferHookInstruction(
+  //     connection,
+  //     senderTokenAccount,
+  //     mint.publicKey,
+  //     receiverTokenAccount,
+  //     keyPair.publicKey,
+  //     10 * 10 ** decimals,
+  //     [],
+  //     "confirmed",
+  //     TOKEN_2022_PROGRAM_ID
+  //   )
+  // );
 
-  const txn3Hash = await sendAndConfirmTransaction(connection, txn3, [keyPair]);
-  console.log(
-    `Congratulations! Look at your transaction in the Solana Explorer:
-    https://explorer.solana.com/tx/${txn3Hash}?cluster=custom`
-  );
+  // const txn3Hash = await sendAndConfirmTransaction(connection, txn3, [keyPair]);
+  // console.log(
+  //   `Congratulations! Look at your transaction in the Solana Explorer:
+  //   https://explorer.solana.com/tx/${txn3Hash}?cluster=custom`
+  // );
 };
 
 main().catch((err) => {
