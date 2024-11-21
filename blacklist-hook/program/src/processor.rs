@@ -8,10 +8,11 @@ use solana_program::{
     program_error::ProgramError,
     pubkey::Pubkey,
     rent::Rent,
-    system_instruction, system_program,
+    system_instruction,
     sysvar::Sysvar,
 };
-use spl_transfer_hook_interface::instruction::TransferHookInstruction;
+use spl_tlv_account_resolution::{account::ExtraAccountMeta, state::ExtraAccountMetaList};
+use spl_transfer_hook_interface::instruction::{ExecuteInstruction, TransferHookInstruction};
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -23,7 +24,9 @@ pub fn process_instruction(
             TransferHookInstruction::Execute { amount } => msg!("execute"),
             TransferHookInstruction::InitializeExtraAccountMetaList {
                 extra_account_metas,
-            } => msg!("initialize ExtraAccountMetaList"),
+            } => {
+                msg!("Initializing extra account meta list...");
+            }
             TransferHookInstruction::UpdateExtraAccountMetaList {
                 extra_account_metas,
             } => msg!("update ExtraAccountMetaList"),
@@ -190,8 +193,11 @@ pub fn add_to_blacklist(
     }
 
     if *initializer.key != admin_account_data.admin {
+        msg!("Admin authority is incorrect");
         return Err(ProgramError::IncorrectAuthority);
     }
+
+    msg!("Admin authority is correct");
 
     // initialize blacklist account - no data needed
     let (expected_blacklist_pda, bump_seed) = Pubkey::find_program_address(

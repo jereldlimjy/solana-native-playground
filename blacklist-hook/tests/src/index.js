@@ -1,6 +1,7 @@
 import {
   Connection,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   sendAndConfirmTransaction,
   SystemProgram,
@@ -25,82 +26,82 @@ import * as borsh from "@coral-xyz/borsh";
 
 const main = async () => {
   const transferHookProgramId = new PublicKey(
-    "5GdeT4xoWizxecyPzWBkFbvuRohy2HUWcfhxRgXHvGSs"
+    "2vo6T4ncvhhWw7S73QfZznR141gHLT2KsDJjLB75NhqL"
   );
   const connection = new Connection("http://127.0.0.1:8899", "confirmed");
   const keyPair = await getKeypairFromFile("~/.config/solana/id.json");
 
   // Admin PDA tests
-  // const blockhashInfo = await connection.getLatestBlockhash();
+  const blockhashInfo = await connection.getLatestBlockhash();
 
   // // initialize admin instruction
-  // const initializeTxn = new Transaction({
-  //   ...blockhashInfo,
-  // });
+  const initializeTxn = new Transaction({
+    ...blockhashInfo,
+  });
 
-  // const initializeAdminSchema = borsh.struct([
-  //   borsh.u8("variant"),
-  //   borsh.publicKey("admin"),
-  // ]);
+  const initializeAdminSchema = borsh.struct([
+    borsh.u8("variant"),
+    borsh.publicKey("admin"),
+  ]);
 
-  // const buffer = Buffer.alloc(1000);
+  const buffer = Buffer.alloc(1000);
 
-  // initializeAdminSchema.encode(
-  //   {
-  //     variant: 0,
-  //     admin: keyPair.publicKey,
-  //   },
-  //   buffer
-  // );
+  initializeAdminSchema.encode(
+    {
+      variant: 0,
+      admin: keyPair.publicKey,
+    },
+    buffer
+  );
 
-  // const instructionBuffer = buffer.subarray(
-  //   0,
-  //   initializeAdminSchema.getSpan(buffer)
-  // );
+  const instructionBuffer = buffer.subarray(
+    0,
+    initializeAdminSchema.getSpan(buffer)
+  );
 
-  // // seeds - sender address + movie title
-  // const seeds = [Buffer.from("admin")];
+  // seeds - sender address + movie title
+  const seeds = [Buffer.from("admin")];
 
-  // const [pda, _] = PublicKey.findProgramAddressSync(
-  //   seeds,
-  //   transferHookProgramId
-  // );
+  const [pda, _] = PublicKey.findProgramAddressSync(
+    seeds,
+    transferHookProgramId
+  );
 
-  // console.log("PDA is:", pda.toBase58());
+  console.log("PDA is:", pda.toBase58());
 
-  // initializeTxn.add(
-  //   new TransactionInstruction({
-  //     programId: transferHookProgramId,
-  //     keys: [
-  //       {
-  //         pubkey: keyPair.publicKey,
-  //         isSigner: true,
-  //         isWritable: true,
-  //       },
-  //       {
-  //         pubkey: pda,
-  //         isSigner: false,
-  //         isWritable: true,
-  //       },
-  //       {
-  //         pubkey: SystemProgram.programId,
-  //         isSigner: false,
-  //         isWritable: false,
-  //       },
-  //     ],
-  //     data: instructionBuffer,
-  //   })
-  // );
+  initializeTxn.add(
+    new TransactionInstruction({
+      programId: transferHookProgramId,
+      keys: [
+        {
+          pubkey: keyPair.publicKey,
+          isSigner: true,
+          isWritable: true,
+        },
+        {
+          pubkey: pda,
+          isSigner: false,
+          isWritable: true,
+        },
+        {
+          pubkey: SystemProgram.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+      ],
+      data: instructionBuffer,
+    })
+  );
 
-  // const initializeTxHash = await sendAndConfirmTransaction(
-  //   connection,
-  //   initializeTxn,
-  //   [keyPair]
-  // );
-  // console.log(
-  //   `Congratulations! Look at your transaction in the Solana Explorer:
-  //   https://explorer.solana.com/tx/${initializeTxHash}?cluster=custom`
-  // );
+  const initializeTxHash = await sendAndConfirmTransaction(
+    connection,
+    initializeTxn,
+    [keyPair]
+  );
+  console.log(
+    `Congratulations! Look at your transaction in the Solana Explorer:
+    https://explorer.solana.com/tx/${initializeTxHash}?cluster=custom`
+  );
 
   // update admin instruction
   // const updateTxn = new Transaction({
@@ -249,6 +250,226 @@ const main = async () => {
     `Congratulations! Look at your transaction in the Solana Explorer:
     https://explorer.solana.com/tx/${txn2Hash}?cluster=custom`
   );
+
+  // Test blacklist instructions
+  // test adding address to blacklist
+  const addToBlacklistTxn = new Transaction({
+    ...blockhashInfo,
+  });
+
+  const blacklistSchema = borsh.struct([
+    borsh.u8("variant"),
+    borsh.publicKey("address"),
+  ]);
+
+  const addToBlacklistBuffer = Buffer.alloc(1000);
+
+  const blacklistKeypair = new Keypair();
+
+  blacklistSchema.encode(
+    {
+      variant: 2,
+      address: blacklistKeypair.publicKey,
+    },
+    addToBlacklistBuffer
+  );
+
+  const addToBlacklistInstructionBuffer = addToBlacklistBuffer.subarray(
+    0,
+    blacklistSchema.getSpan(addToBlacklistBuffer)
+  );
+
+  // admin seeds - "admin" string
+  const adminSeeds = [Buffer.from("admin")];
+
+  const [adminPda] = PublicKey.findProgramAddressSync(
+    adminSeeds,
+    transferHookProgramId
+  );
+
+  // blacklist seeds - "blacklist" string + address
+  const blacklistSeeds = [
+    Buffer.from("blacklist"),
+    blacklistKeypair.publicKey.toBuffer(),
+  ];
+
+  const [blacklistPda] = PublicKey.findProgramAddressSync(
+    blacklistSeeds,
+    transferHookProgramId
+  );
+
+  addToBlacklistTxn.add(
+    new TransactionInstruction({
+      programId: transferHookProgramId,
+      keys: [
+        {
+          pubkey: keyPair.publicKey,
+          isSigner: true,
+          isWritable: true,
+        },
+        {
+          pubkey: adminPda,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: blacklistPda,
+          isSigner: false,
+          isWritable: true,
+        },
+        {
+          pubkey: SystemProgram.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+      ],
+      data: addToBlacklistInstructionBuffer,
+    })
+  );
+
+  const addToBlacklistHash = await sendAndConfirmTransaction(
+    connection,
+    addToBlacklistTxn,
+    [keyPair]
+  );
+  console.log(
+    `Congratulations! Look at your add to blacklist transaction in the Solana Explorer:
+    https://explorer.solana.com/tx/${addToBlacklistHash}?cluster=custom`
+  );
+
+  // test removing address from blacklist
+  const removeFromBlacklistBuffer = Buffer.alloc(1000);
+
+  blacklistSchema.encode(
+    {
+      variant: 3,
+      address: blacklistKeypair.publicKey,
+    },
+    removeFromBlacklistBuffer
+  );
+
+  const removeFromBlacklistInstructionBuffer =
+    removeFromBlacklistBuffer.subarray(
+      0,
+      blacklistSchema.getSpan(removeFromBlacklistBuffer)
+    );
+
+  const removeFromBlacklistTxn = new Transaction({
+    ...blockhashInfo,
+  });
+
+  removeFromBlacklistTxn.add(
+    new TransactionInstruction({
+      programId: transferHookProgramId,
+      keys: [
+        {
+          pubkey: keyPair.publicKey,
+          isSigner: true,
+          isWritable: true,
+        },
+        {
+          pubkey: adminPda,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: blacklistPda,
+          isSigner: false,
+          isWritable: true,
+        },
+      ],
+      data: removeFromBlacklistInstructionBuffer,
+    })
+  );
+
+  const removeFromBlacklistHash = await sendAndConfirmTransaction(
+    connection,
+    removeFromBlacklistTxn,
+    [keyPair]
+  );
+  console.log(
+    `Congratulations! Look at your remove from blacklist transaction in the Solana Explorer:
+    https://explorer.solana.com/tx/${removeFromBlacklistHash}?cluster=custom`
+  );
+
+  // test non-admin add/remove
+  const addToBlacklistNonAdminTxn = new Transaction({
+    ...blockhashInfo,
+  });
+
+  const addToBlacklistNonAdminBuffer = Buffer.alloc(1000);
+
+  const nonAdminKeypair = new Keypair();
+  console.log(
+    "non admin keypair address:",
+    nonAdminKeypair.publicKey.toBase58()
+  );
+
+  // airdrop to non admin account
+  const airdropTx = await connection.requestAirdrop(
+    nonAdminKeypair.publicKey,
+    100 * LAMPORTS_PER_SOL
+  );
+
+  await connection.confirmTransaction({
+    blockhash: blockhashInfo.blockhash,
+    lastValidBlockHeight: blockhashInfo.lastValidBlockHeight,
+    signature: airdropTx,
+  });
+
+  blacklistSchema.encode(
+    {
+      variant: 2,
+      address: blacklistKeypair.publicKey,
+    },
+    addToBlacklistNonAdminBuffer
+  );
+
+  const addToBlacklistNonAdminInstructionBuffer =
+    addToBlacklistNonAdminBuffer.subarray(
+      0,
+      blacklistSchema.getSpan(addToBlacklistNonAdminBuffer)
+    );
+
+  addToBlacklistNonAdminTxn.add(
+    new TransactionInstruction({
+      programId: transferHookProgramId,
+      keys: [
+        {
+          pubkey: nonAdminKeypair.publicKey,
+          isSigner: true,
+          isWritable: true,
+        },
+        {
+          pubkey: adminPda,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: blacklistPda,
+          isSigner: false,
+          isWritable: true,
+        },
+        {
+          pubkey: SystemProgram.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+      ],
+      data: addToBlacklistNonAdminInstructionBuffer,
+    })
+  );
+
+  // should fail
+  try {
+    const addToBlacklistNonAdminHash = await sendAndConfirmTransaction(
+      connection,
+      addToBlacklistNonAdminTxn,
+      [nonAdminKeypair]
+    );
+  } catch (err) {
+    console.log("adding to blacklist using non-admin account failed");
+  }
 
   // transfer tokens from default keypair -> newly generated keypair
   // create extraAccountMetaList account
